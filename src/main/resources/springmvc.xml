@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--
+		需要进行 Spring 整合 SpringMVC 吗 ?
+		还是否需要再加入 Spring 的 IOC 容器 ?
+		是否需要再 web.xml 文件中配置启动 Spring IOC 容器的 ContextLoaderListener ?
+
+		1. 需要: 通常情况下, 类似于数据源, 事务, 整合其他框架都是放在 Spring 的配置文件中(而不是放在 SpringMVC 的配置文件中).
+		实际上放入 Spring 配置文件对应的 IOC 容器中的还有 Service 和 Dao.
+		2. 不需要: 都放在 SpringMVC 的配置文件中. 也可以分多个 Spring 的配置文件, 然后使用 import 节点导入其他的配置文件
+	-->
+
+    <!--
+        问题: 若 Spring 的 IOC 容器和 SpringMVC 的 IOC 容器扫描的包有重合的部分, 就会导致有的 bean 会被创建 2 次.
+        解决:
+        1. 使 Spring 的 IOC 容器扫描的包和 SpringMVC 的 IOC 容器扫描的包没有重合的部分.
+        2. 使用 exclude-filter 和 include-filter 子节点来规定只能扫描的注解
+    -->
+
+    <!--
+        SpringMVC 的 IOC 容器中的 bean 可以来引用 Spring IOC 容器中的 bean.
+        返回来呢 ? 反之则不行. Spring IOC 容器中的 bean 却不能来引用 SpringMVC IOC 容器中的 bean!
+    -->
+
+    <!-- 配置自动扫描的包 -->
+    <context:component-scan base-package="com.xt.springmvc" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+
+    <!-- 配置视图解析器-->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- WEB-INF 前务必有 / ， 否则返回的路径前面会拼接 @RequestMapping 在类注解上修饰的路径 -->
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--
+        配置视图 BeanNameViewResolver 解析器: 使用视图的名字来解析视图
+        通过 order 属性来定义视图解析器的优先级，order 值越小优先级越高
+    -->
+    <bean id="beanNameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver">
+        <property name="order" value="100"/>
+    </bean>
+    <!-- 配置国际化资源文件 -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="i18n"/>
+    </bean>
+
+    <!--
+        配置直接转发的页面
+        可以直接响应转发的页面，而无需再经过 Handler 的方法
+    -->
+    <mvc:view-controller path="/success" view-name="success"/>
+    <!--<mvc:view-controller path="/i18n" view-name="i18n"/>-->
+    <mvc:view-controller path="/i18n2" view-name="i18n2"/>
+
+    <!--
+        default-servlet-handler: 将在 SpringMVC 上下文中定义一个 DefaultServletHttpRequestHandler,
+        它会对进入 DispatcherServlet 的请求进行筛选，
+        如果发现是没有经过映射的请求，就将该请求交由 WEB 应用服务器默认的 Servlet 处理。
+        如果不是静态资源的请求，才由 DispatcherServlet 继续处理
+
+        一般 WEB 应用服务器默认的 Servlet 的名称都是 default
+        若所使用的 WEB 服务器的默认 Servlet 名称不是 default，则需要通过
+        default-servlet-name 属性显示指定
+    -->
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+    <!--
+        在实际开发中通常需要配置 mvc:annotation-driven
+        <mvc:annotation-driven />
+        1. 会自动注册以下三个 bean：
+            RequestMappingHandlerMapping
+            RequestMappingHandlerAdapter
+            ExceptionHandlerExceptionResolver
+        2. 还将提供以下支持： •
+            支持使用 ConversionService 实例对表单参数进行类型转换
+            支持使用 @NumberFormat annotation、@DateTimeFormat 注解完成数据类型的格式化
+            支持使用 @Valid 注解对 JavaBean 实例进行 JSR 303 验证
+            支持使用 @RequestBody 和 @ResponseBody 注解
+    -->
+    <mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven>
+
+    <!--
+        配置类型转换器
+        FormattingConversionService：ConversionService 接口的实现类，既具有类型转换的功能，又具有格式化的功能
+    -->
+    <!--<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">-->
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <ref bean="employeeConverter"/>
+            </set>
+        </property>
+    </bean>
+
+    <!-- 配置 SessionLocaleResolver -->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"/>
+
+    <!-- 配置文件上传 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="maxUploadSize" value="1024000"/>
+    </bean>
+
+    <mvc:interceptors>
+        <!-- 配置自定义拦截器 -->
+        <bean class="com.xt.springmvc.interceptor.MyFirstInterceptor"/>
+
+        <!-- 配置拦截器(不)作用的路径 -->
+        <mvc:interceptor>
+            <mvc:mapping path="/emp/emps"/>
+            <bean class="com.xt.springmvc.interceptor.MySecondInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!--配置 LocalChangeInterceptor 国际化资源相关 -->
+    <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+
+    <!-- 配置 SimpleMappingExceptionResolver 来映射异常 -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionAttribute" value="ex"/>
+        <property name="exceptionMappings">
+            <props>
+                <prop key="java.lang.ArrayIndexOutOfBoundsException">error</prop>
+            </props>
+        </property>
+    </bean>
+</beans>
