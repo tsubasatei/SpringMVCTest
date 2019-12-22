@@ -22,9 +22,9 @@ import java.util.Map;
 @RequestMapping("/emp")
 public class EmployeeHandler {
     @Autowired
-    EmployeeDao employeeDao;
+    private EmployeeDao employeeDao;
     @Autowired
-    DepartmentDao departmentDao;
+    private DepartmentDao departmentDao;
 
     @ModelAttribute
     public void getEmployee(@RequestParam(value = "id", required = false) Integer id, Map<String, Object> map) {
@@ -56,7 +56,7 @@ public class EmployeeHandler {
      * 3. Spring MVC 就会实施校验并将校验结果保存在被校验入参对象之后的 BindingResult 或 Errors 入参中
      *
      * BindingResult 或 Errors 类型
-     * 需校验的 Bean 对象和其绑定结果对象或错误对象时成对出现的，它们之间不允许声明其他的入参
+     * 需校验的 Bean 对象和其绑定结果对象或错误对象是成对出现的，它们之间不允许声明其他的入参
      *
      * @param employee
      * @param bindingResult

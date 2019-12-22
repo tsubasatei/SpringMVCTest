@@ -30,7 +30,7 @@
     <!-- 配置自动扫描的包 -->
     <context:component-scan base-package="com.xt.springmvc" use-default-filters="false">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
     </context:component-scan>
 
     <!-- 配置视图解析器-->
@@ -47,7 +47,10 @@
     <bean id="beanNameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver">
         <property name="order" value="100"/>
     </bean>
-    <!-- 配置国际化资源文件 -->
+    <!-- 配置国际化资源文件
+         若项目中使用了 JSTL，则 SpringMVC 会自动把视图由 InternalResourceView 转为 JstlView
+         若使用 JSTL 的 fmt 标签则需要在 SpringMVC 的配置文件中配置国际化资源文件
+    -->
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
         <property name="basename" value="i18n"/>
     </bean>
@@ -100,10 +103,17 @@
         </property>
     </bean>
 
-    <!-- 配置 SessionLocaleResolver -->
+    <!--
+        SessionLocaleResolver：根据 Session 中特定的属性确定本地化类型
+        LocaleChangeInterceptor：从请求参数中获取本次请求对应的本地化类型。
+
+        配置 SessionLocaleResolver
+    -->
     <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"/>
 
-    <!-- 配置文件上传 -->
+    <!-- 配置文件上传
+         defaultEncoding: 必须和用户 JSP 的 pageEncoding 属性一致，以便正确解析表单的内容
+    -->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="maxUploadSize" value="1024000"/>
@@ -118,12 +128,15 @@
             <mvc:mapping path="/emp/emps"/>
             <bean class="com.xt.springmvc.interceptor.MySecondInterceptor"/>
         </mvc:interceptor>
+
+        <!--配置 LocalChangeInterceptor 国际化资源相关 -->
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+
     </mvc:interceptors>
 
-    <!--配置 LocalChangeInterceptor 国际化资源相关 -->
-    <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
-
-    <!-- 配置 SimpleMappingExceptionResolver 来映射异常 -->
+    <!-- 配置 SimpleMappingExceptionResolver 来映射异常
+        如果希望对所有异常进行统一处理，可以使用 SimpleMappingExceptionResolver，它将异常类名映射为视图名，即发生异常时使用对应的视图报告异常
+    -->
     <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <property name="exceptionAttribute" value="ex"/>
         <property name="exceptionMappings">

@@ -4,11 +4,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 
-/**
- * @author xt
- * @create 2019/11/7 1:44
- * @Desc
- */
+
 @ControllerAdvice
 public class MyExceptionHandler {
 

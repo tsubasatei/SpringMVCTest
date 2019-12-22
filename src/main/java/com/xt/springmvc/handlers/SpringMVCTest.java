@@ -53,7 +53,7 @@ public class SpringMVCTest {
      * 若无，返回同标注在方法上
      * @return
      */
-    @PostMapping("/testDefaultHandlerExceptionResolver")
+    @GetMapping("/testDefaultHandlerExceptionResolver")
     public String testDefaultHandlerExceptionResolver() {
         System.out.println("testDefaultHandlerExceptionResolver");
         return SUCCESS;
@@ -135,13 +135,15 @@ public class SpringMVCTest {
         in.read(body);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment;filename=application-text.yml");
+        headers.add("Content-Disposition", "attachment;filename=application-test.yml");
         HttpStatus status = HttpStatus.OK;
 
-        ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(body, headers, status);
+        ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(body, headers, status);
         return responseEntity;
     }
 
+
+    // 不配置 CommonsMultipartResolver 时，可用
     @ResponseBody
     @PostMapping("/testHttpMessageConverter")
     public String testHttpMessageConverter(@RequestBody String body) {
@@ -156,7 +158,7 @@ public class SpringMVCTest {
         return employees;
     }
 
-    @GetMapping("/testConvert")
+    @PostMapping("/testConvert")
     public String testConvert(@RequestParam("employee")Employee employee) {
         System.out.println("员工信息：" + employee);
         employeeDao.save(employee);
@@ -236,7 +238,7 @@ public class SpringMVCTest {
      *          > 在 implicitModel 中查找 attrName 对应的属性值。若存在，ok
      *          > 若不存在：则验证当前 Handler 是否使用了 @SessionAttributes 进行修饰，若使用了，
      *                      则尝试从 Session 中获取 attrName 所对应的值。
-     *                      若 Session 中没有对应的属性值，则抛出异常？？？
+     *                      若 Session 中没有对应的属性值，则抛出异常？？？(没有抛出异常！！！)
      *          > 若 Handler 没有使用 @SessionAttributes 进行修饰，或 @SessionAttributes 中没有使用
      *              value 值指定的 key 和 attrName 相匹配，则通过反射创建 POJO 对象
      *
@@ -305,7 +307,6 @@ public class SpringMVCTest {
     public void testServletAPI(HttpServletRequest request, HttpServletResponse response, Writer out) throws IOException {
         System.out.println("testServletAPI : request = " + request + ", response = " + response);
         out.write("hello Servlet API");
-//        return SUCCESS;
     }
 
     /**
@@ -352,7 +353,7 @@ public class SpringMVCTest {
      * @return
      */
     @GetMapping("/testRequestParam")
-    public String testRequestParam(@RequestParam("i18n.username") String username,
+    public String testRequestParam(@RequestParam("username") String username,
                                    @RequestParam(value = "age", required = false, defaultValue = "0") int age) {
         System.out.println("testRequestParam : username = " + username + ", age = " + age);
         return SUCCESS;
@@ -433,7 +434,7 @@ public class SpringMVCTest {
      * params 和 headers 支持简单的表达式
      * @return
      */
-    @RequestMapping(value = "/testParamsAndHeaders", params = {"i18n.username", "age!=10"}, headers = { "Accept-Language=zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" })
+    @RequestMapping(value = "/testParamsAndHeaders", params = {"username", "age!=10"}, headers = { "Accept-Language=zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" })
     public String testParamsAndHeaders() {
         System.out.println("testParamsAndHeaders");
         return SUCCESS;

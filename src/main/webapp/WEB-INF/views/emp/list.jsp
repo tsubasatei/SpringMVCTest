@@ -32,7 +32,7 @@
         $(function () {
             $(".delete").click(function () {
                 var href = $(this).attr("href");
-                $("#deleteBtnForm").attr("action", href).submit()
+                $("#deleteBtnForm").attr("action", href).submit();
                 return false;
             })
         })
@@ -78,8 +78,5 @@
             </tbody>
         </table>
     </c:if>
-
-
-
 </body>
 </html>

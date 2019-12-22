@@ -8,6 +8,7 @@
   <artifactId>spring-mvc-test</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
+  <description>SpringMVC</description>
 
 
   <properties>
@@ -19,6 +20,8 @@
     <hibernate-validator.version>6.1.0.Final</hibernate-validator.version>
     <json.version>2.10.0</json.version>
     <fileupload.version>1.4</fileupload.version>
+    <commons-logging.version>1.1.1</commons-logging.version>
+    <lombok.version>1.18.8</lombok.version>
   </properties>
 
   <dependencies>
@@ -91,7 +94,7 @@
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
+      <version>${commons-logging.version}</version>
     </dependency>
 
     <!-- 使用 JSR 303 验证标准 -->
@@ -121,6 +124,11 @@
       <version>2.2.1-b03</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
